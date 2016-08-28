@@ -3,19 +3,13 @@ if !System.get_env("EXERCISM_TEST_EXAMPLES") do
 end
 
 ExUnit.start
-ExUnit.configure exclude: :pending, trace: true
+#ExUnit.configure exclude: :pending#, trace: true
 
 defmodule ChangeTest do
   use ExUnit.Case
 
   @tag :pending
-  test "my test..." do
-    change = %{2 => 6, 7 => 0, 9 => 0}
-    assert Change.generate(12, [2, 7, 9]) == {:ok, change}
-  end
-
-  #@tag :pending
-  test "my test2..." do
+  test "generates the correct change when there are multiple solutions for amount but only one correct one" do
     change = %{3 => 0, 6 => 2, 10 => 1}
     assert Change.generate(22, [3, 6, 10]) == {:ok, change}
   end

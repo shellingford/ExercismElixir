@@ -1,5 +1,4 @@
 defmodule Change do
-  require Logger
   @doc """
     Determine the least number of coins to be given to the user such
     that the sum of the coins' value would equal the correct amount of change.
@@ -18,42 +17,31 @@ defmodule Change do
 
   @spec generate(integer, list) :: {:ok, map} | :error
   def generate(amount, values) do
-    coins = values
-      |> Enum.sort_by(&(&1), &>=/2)
-      |> Enum.map(&{&1, 0})
+    sorted_coins = values |> Enum.sort_by(&(&1), &>=/2)
 
-      #not finished...
-    iterate_all_coins(amount, coins, %{})
-  end
-
-  #we must iterate over all coins to see if we can use any of them, so we need
-  #to have backtracking function that resets search if not found with current coin list
-  defp iterate_all_coins(amount, [largest_coin | other_coins], map) do
-    res = check(amount, [largest_coin | other_coins], map)
-    case res do
-      :error -> 
-          {coin, value} = largest_coin
-          iterate_all_coins(amount, other_coins, put_in(map[largest_coin], 0))
-      _ -> res
+    if amount < 0 or List.last(sorted_coins) > amount do
+      :error
+    else
+      coins = sorted_coins |> Enum.map(&{&1, 0}) |> Enum.into(%{})
+      generate_coins(sorted_coins, amount, coins)
     end
   end
 
-  defp iterate_all_coins(_amount, [], _map) do
-    :error
+  defp generate_coins(_other_coins, amount, coins) when amount == 0, do: {:ok, coins}
+  defp generate_coins([], amount, _coins) when amount > 0, do: :error
+  defp generate_coins(_other_coins, amount, _coins) when amount < 0, do: :error
+
+  defp generate_coins([coin | other_coins], amount, coins) when coin > (amount - coin) do
+    res = generate_coins(other_coins, amount - coin, Map.update!(coins, coin, &(&1 + 1)))
+    evaluate_result(res, other_coins, amount, coins)
   end
 
-  defp check(0, coins, map), do: { :ok, Enum.into(coins, map) }
+  defp generate_coins([coin | other_coins], amount, coins) do
+    res = generate_coins([coin | other_coins], amount - coin, Map.update!(coins, coin, &(&1 + 1)))
+    evaluate_result(res, other_coins, amount, coins)
+  end
 
-  defp check(remaining_amount, [{coin, coin_count} | other_coins], map)
-    when remaining_amount >= coin, do 
-      case check(rem(remaining_amount, coin), other_coins, put_in(map[coin], div(remaining_amount, coin))) do
-        
-      end
-    end
+  defp evaluate_result(:error, other_coins, amount, coins), do: generate_coins(other_coins, amount, coins)
+  defp evaluate_result({:ok, coins}, _other_coins, _amount, _coins), do: {:ok, coins}
 
-  defp check(remaining_amount, [{coin, _coin_count} | other_coins], map)
-    when remaining_amount < coin,
-    do: check(remaining_amount, other_coins, put_in(map[coin], 0))
-    
-  defp check(_remaining_amount, _coin_list, _coin_map), do: :error
 end

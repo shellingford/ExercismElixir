@@ -1,5 +1,4 @@
 defmodule Minesweeper do
-	require Logger
   @doc """
   http://exercism.io/exercises/elixir/minesweeper/readme
   Annotate empty spots next to mines with the number of mines next to them.
@@ -9,7 +8,7 @@ defmodule Minesweeper do
   def annotate(board) do
   	cond do
   		length(board) == 0 -> board
-      #if there's only bombs on the board then we don't need to do anything
+      #if there are only bombs on the board then we don't need to do anything
   		Enum.all?(board, fn(x) -> Regex.match?(~r/^\*+$/, x) end) -> board
       #if there are no bombs on the field then we don't need to do anything
   		Enum.all?(board, fn(x) -> Regex.match?(~r/^\s+$/, x)  end) -> board
