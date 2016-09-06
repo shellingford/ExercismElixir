@@ -1,5 +1,4 @@
 defmodule Triplet do
-  require Logger
   @doc """
   Calculates sum of a given triplet of integers.
   """
@@ -32,22 +31,31 @@ defmodule Triplet do
     min..max
       |> Enum.to_list
       |> Enum.map(fn(x) -> x * x end)
-      |> find_triplets(fn(a, b, c, _) -> c == a + b end, 0)
+      |> triplets(fn(a, b, c, _) -> c == a + b end, 0)
   end
 
-  defp find_triplets([], _fn_compare, _sum), do: []
-  defp find_triplets([num | other_nums], fn_compare, sum) do
-    find_triplets(num, other_nums, fn_compare, sum) ++ find_triplets(other_nums, fn_compare, sum)
+  defp triplets(nums, _fn_compare, _sum) when length(nums) < 3, do: []
+  defp triplets([num | other_nums], fn_compare, sum) do
+    find_triplets(num, other_nums, fn_compare, sum) ++ triplets(other_nums, fn_compare, sum)
   end
 
+  #for set first number finds other two numbers for pythagorean triplet (if they exist)
   defp find_triplets(_num, [], _fn_compare, _sum), do: []
   defp find_triplets(a, [b | other_nums], fn_compare, sum) do
-    if ((c = Enum.find(other_nums, -1, fn(c) -> fn_compare.(a, b, c, sum) end)) > 0) do
-      [[round(:math.sqrt(a)), round(:math.sqrt(b)), round(:math.sqrt(c))]] ++ find_triplets(a, other_nums, fn_compare, sum)
+    {found_triplet, c} = last_triplet_number(a, b, other_nums, sum, fn_compare)
+    if (found_triplet) do
+      [sqrt_triplets(a, b, c)] ++ find_triplets(a, other_nums, fn_compare, sum)
     else
       find_triplets(a, other_nums, fn_compare, sum)
     end
   end
+
+  defp last_triplet_number(a, b, other_nums, sum, fn_compare) do
+    c = Enum.find(other_nums, -1, fn(c) -> fn_compare.(a, b, c, sum) end)
+    {c > 0, c}
+  end
+
+  defp sqrt_triplets(a, b, c), do: [round(:math.sqrt(a)), round(:math.sqrt(b)), round(:math.sqrt(c))]
 
   @doc """
   Generates a list of pythagorean triplets from a given min to a given max, whose values add up to a given sum.
@@ -57,7 +65,7 @@ defmodule Triplet do
     min..max
       |> Enum.to_list
       |> Enum.map(fn(x) -> x * x end)
-      |> find_triplets(fn(a, b, c, sum) -> c == a + b and 
+      |> triplets(fn(a, b, c, sum) -> c == a + b and 
           round(:math.sqrt(a)) + round(:math.sqrt(b)) + round(:math.sqrt(c)) == sum end, sum)
   end
 

@@ -20,8 +20,7 @@ defmodule PrimeFactors do
   defp compute_factors(1, _divisor, _max_divisor, prime_factors), do: prime_factors
 
   defp compute_factors(number, divisor, max_divisor, prime_factors) when divisor > max_divisor do 
-  	prime_factors = prime_factors ++ [number]
-  	prime_factors
+  	prime_factors ++ [number]
   end
 
   defp compute_factors(number, divisor, max_divisor, []) when rem(number, divisor) == 0 do

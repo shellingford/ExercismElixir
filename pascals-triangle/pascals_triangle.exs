@@ -1,5 +1,4 @@
 defmodule PascalsTriangle do
-	require Logger
   @doc """
   Calculates the rows of a pascal triangle
   with the given height

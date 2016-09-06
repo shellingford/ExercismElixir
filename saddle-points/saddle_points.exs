@@ -1,5 +1,4 @@
 defmodule Matrix do
-  require Logger
   @doc """
   Parses a string representation of a matrix
   to a list of rows

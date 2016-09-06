@@ -18,30 +18,33 @@ defmodule Change do
   @spec generate(integer, list) :: {:ok, map} | :error
   def generate(amount, values) do
     sorted_coins = values |> Enum.sort_by(&(&1), &>=/2)
+    coins = sorted_coins |> Enum.map(&{&1, 0}) |> Enum.into(%{})
+    counted_coins(sorted_coins, amount, coins)
+  end
 
-    if amount < 0 or List.last(sorted_coins) > amount do
-      :error
+  defp counted_coins(_other_coins, amount, coins) when amount == 0, do: {:ok, coins}
+  defp counted_coins([], amount, _coins) when amount > 0, do: :error
+  defp counted_coins(_other_coins, amount, _coins) when amount < 0, do: :error
+
+  defp counted_coins([coin | other_coins], amount, coins) when coin > (amount - coin) do
+    res = counted_coins(other_coins, amount - coin, Map.update!(coins, coin, &(&1 + 1)))
+    if counting_done?(res) do
+      res
     else
-      coins = sorted_coins |> Enum.map(&{&1, 0}) |> Enum.into(%{})
-      generate_coins(sorted_coins, amount, coins)
+      counted_coins(other_coins, amount, coins)
     end
   end
 
-  defp generate_coins(_other_coins, amount, coins) when amount == 0, do: {:ok, coins}
-  defp generate_coins([], amount, _coins) when amount > 0, do: :error
-  defp generate_coins(_other_coins, amount, _coins) when amount < 0, do: :error
-
-  defp generate_coins([coin | other_coins], amount, coins) when coin > (amount - coin) do
-    res = generate_coins(other_coins, amount - coin, Map.update!(coins, coin, &(&1 + 1)))
-    evaluate_result(res, other_coins, amount, coins)
+  defp counted_coins([coin | other_coins], amount, coins) do
+    res = counted_coins([coin | other_coins], amount - coin, Map.update!(coins, coin, &(&1 + 1)))
+    if counting_done?(res) do
+      res
+    else
+      counted_coins(other_coins, amount, coins)
+    end
   end
 
-  defp generate_coins([coin | other_coins], amount, coins) do
-    res = generate_coins([coin | other_coins], amount - coin, Map.update!(coins, coin, &(&1 + 1)))
-    evaluate_result(res, other_coins, amount, coins)
-  end
-
-  defp evaluate_result(:error, other_coins, amount, coins), do: generate_coins(other_coins, amount, coins)
-  defp evaluate_result({:ok, coins}, _other_coins, _amount, _coins), do: {:ok, coins}
+  defp counting_done?(:error), do: false
+  defp counting_done?({:ok, _coins}), do: true
 
 end

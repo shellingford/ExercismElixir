@@ -19,18 +19,16 @@ defmodule Luhn do
 
   defp do_checks([], csum), do: csum
   defp do_checks([_first, second | _other_digits], csum) when second == nil, do: csum
+  defp do_checks([first | other_digits], csum) when length(other_digits) == 0, do: csum + String.to_integer(first)
   defp do_checks([first, second | other_digits], csum) when second != nil do
     dig1 = String.to_integer(first)
     dig2 = String.to_integer(second) * 2
-    dig2 = 
-      cond do
-        dig2 >= 10 -> dig2 - 9
-        dig2 < 10 -> dig2
-      end
+    dig2 = recalc_dig2(dig2)
     do_checks(other_digits, csum + dig2 + dig1)
   end
 
-  defp do_checks([first | other_digits], csum) when length(other_digits) == 0, do: csum + String.to_integer(first)
+  defp recalc_dig2(dig2) when dig2 >= 10, do: dig2 - 9
+  defp recalc_dig2(dig2) when dig2 < 10, do: dig2
 
   @doc """
   Checks if the given number is valid via the luhn formula

@@ -18,38 +18,32 @@ defmodule Queens do
   """
   @spec to_string(Queens.t()) :: String.t()
   def to_string(queens) do
-    {blackX, blackY} = queens.black
-    {whiteX, whiteY} = queens.white
-
-    create_chess_board(Enum.to_list(0..7), whiteX, whiteY, blackX, blackY, "")
+    chess_board(queens)
   end
 
-  defp create_chess_board([row | other_rows], whiteX, whiteY, blackX, blackY, board) do
-    board = board <> create_row(Enum.to_list(0..7), row, whiteX, whiteY, blackX, blackY, "")
-    board = if (row < 7), do: board <> "\n", else: board
-    create_chess_board(other_rows, whiteX, whiteY, blackX, blackY, board)
+  defp chess_board(queens) do
+    0 |> rows
+      |> Enum.reduce([], fn(row, list) -> list ++ chess_board_row(row, queens.white, queens.black) end)
+      |> Enum.join("\n")
   end
 
-  defp create_chess_board([], _whiteX, _whiteY, _blackX, _blackY, board), do: board
-
-  defp create_row([column | other_columns], row, whiteX, whiteY, blackX, blackY, board) do
-    board = append_board(row, column, whiteY, whiteX, blackX, blackY, board)
-    create_row(other_columns, row, whiteX, whiteY, blackX, blackY, board)
+  #create list of {x,y} coordinates for all positions on a chess board
+  defp rows(x) when x > 7, do: []
+  defp rows(x) do
+    row = for y <- 0..7, do: {x, y}
+    [row] ++ rows(x + 1)
   end
-  defp create_row([], _row, _whiteX, _whiteY, _blackX, _blackY, board), do: board
 
-  defp append_board(row, column, whiteY, whiteX, _blackX, _blackY, board) when column == 0 and column == whiteY and row == whiteX,
-    do: board <> "W" 
-  defp append_board(row, column, whiteY, whiteX, _blackX, _blackY, board) when column > 0 and column == whiteY and row == whiteX,
-    do: board <> " W" 
-  defp append_board(row, column, _whiteY, _whiteX, blackX, blackY, board) when column == 0 and column == blackY and row == blackX,
-    do: board <> "B" 
-  defp append_board(row, column, _whiteY, _whiteX, blackX, blackY, board) when column > 0 and column == blackY and row == blackX ,
-    do: board <> " B" 
-  defp append_board(_row, column, _whiteY, _whiteX, _blackX, _blackY, board) when column == 0,
-    do: board <> "_" 
-  defp append_board(_row, column, _whiteY, _whiteX, _blackX, _blackY, board) when column > 0,
-    do: board <> " _" 
+  defp chess_board_row(row, white_queen, black_queen) do
+    row = row 
+      |> Enum.map(fn(coord) -> row_elem_to_str(coord, white_queen, black_queen) end)
+      |> Enum.join(" ")
+    [row]
+  end
+
+  defp row_elem_to_str({x, y}, {whiteX, whiteY}, _black_queen) when x == whiteX and y == whiteY, do: "W"
+  defp row_elem_to_str({x, y}, _white_queen, {blackX, blackY}) when x == blackX and y == blackY, do: "B"
+  defp row_elem_to_str(_coord, _white_queen, _black_queen) , do: "_"
 
   @doc """
   Checks if the queens can attack each other
@@ -59,11 +53,11 @@ defmodule Queens do
     {blackX, blackY} = queens.black
     {whiteX, whiteY} = queens.white
 
-    cond do
-      blackX == whiteX -> true
-      blackY == whiteY -> true
-      abs(blackX - whiteX) == abs(blackY - whiteY) -> true
-      true -> false
-    end
+    can_queen_attack?(whiteX, whiteY, blackX, blackY)
   end
+
+  defp can_queen_attack?(whiteX, _whiteY, blackX, _blackY) when blackX == whiteX, do: true
+  defp can_queen_attack?(_whiteX, whiteY, _blackX, blackY) when blackY == whiteY, do: true
+  defp can_queen_attack?(whiteX, whiteY, blackX, blackY) when abs(blackX - whiteX) == abs(blackY - whiteY), do: true
+  defp can_queen_attack?(_whiteX, _whiteY, _blackX, _blackY), do: false
 end

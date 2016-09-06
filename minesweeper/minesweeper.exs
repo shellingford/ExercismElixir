@@ -6,14 +6,10 @@ defmodule Minesweeper do
   @spec annotate([String.t]) :: [String.t]
   def annotate(board) when length(board) == 0, do: board
   def annotate(board) do
-    process_board(
-      not(Enum.all?(board, fn(x) -> Regex.match?(~r/^\*+$/, x) end) or 
-          Enum.all?(board, fn(x) -> Regex.match?(~r/^\s+$/, x)  end)),
-      board)
+    process_board(board)
   end
 
-  defp process_board(false, board), do: board
-  defp process_board(true, board) do
+  defp process_board(board) do
     map = board |> board_to_map
     map
      |> Enum.filter(fn({_key, v}) -> v == "*" end)
@@ -46,7 +42,7 @@ defmodule Minesweeper do
   defp neighbours(x, y) do
     for i <- -1..1, 
         j <- -1..1, 
-        {i, j} != 0,
+        {i, j} != {0, 0},
         do: {x + i, y + j}
   end
 
