@@ -1,5 +1,4 @@
 defmodule Series do
-	require Logger
   @doc """
   Finds the largest product of a given number of consecutive numbers in a given string of numbers.
   """
@@ -9,22 +8,15 @@ defmodule Series do
   def largest_product(_number_string, size) when size < 0, do: raise ArgumentError
 
   def largest_product(number_string, size) do
-  	no_iter = String.length(number_string) - size + 1
-  	find_max_product(number_string, 0, no_iter, size)
+    number_string 
+      |> String.graphemes
+      |> Enum.map(&String.to_integer/1)
+      |> chunks(size)
+      |> Enum.map(fn(sublist) -> List.foldl(sublist, 1, &(&1 * &2)) end)
+      |> Enum.max
   end
 
-  defp find_max_product(_number_string, _start_iter, no_iter, _size) when no_iter <= 0, do: raise ArgumentError
-  defp find_max_product(_number_string, start_iter, no_iter, _size) when start_iter == no_iter, do: 0
-
-  defp find_max_product(number_string, start_iter, no_iter, size) do
-  	product = number_string
-  		|> String.slice(start_iter..(start_iter + size - 1))
-  		|> String.graphemes
-  		|> calc_product
-
-  	max(product, find_max_product(number_string, start_iter + 1, no_iter, size))
-  end
-
-  defp calc_product(number_substring), do: Enum.reduce(number_substring, 1, fn(x, acc) -> String.to_integer(x) * acc end)
+  defp chunks(numbers, size) when size > length(numbers), do: raise ArgumentError
+  defp chunks(numbers, size), do: Enum.chunk(numbers, size, 1)
 
 end

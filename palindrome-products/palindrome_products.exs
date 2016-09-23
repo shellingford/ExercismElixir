@@ -6,9 +6,9 @@ defmodule Palindromes do
   def generate(max_factor, min_factor \\ 1) do
   	products =
   		for x <- min_factor..max_factor,
-			y <- x..max_factor,
-			palindrome?(Integer.to_string(x * y)),
-			do: {x * y, [x, y]}
+    			y <- x..max_factor,
+    			palindrome?(Integer.to_string(x * y)),
+    			do: {x * y, [x, y]}
 	  Enum.reduce(products, %{}, fn({product, list}, map) -> Map.update(map, product, [list], fn(x) -> x ++ [list] end) end)
   end
 

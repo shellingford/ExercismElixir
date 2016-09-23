@@ -28,45 +28,23 @@ defmodule Triplet do
   """
   @spec generate(non_neg_integer, non_neg_integer) :: [list(non_neg_integer)]
   def generate(min, max) do
-    min..max
-      |> Enum.to_list
-      |> Enum.map(fn(x) -> x * x end)
-      |> triplets(fn(a, b, c, _) -> c == a + b end, 0)
+    pythagorean_triplets(min, max)
   end
 
-  defp triplets(nums, _fn_compare, _sum) when length(nums) < 3, do: []
-  defp triplets([num | other_nums], fn_compare, sum) do
-    find_triplets(num, other_nums, fn_compare, sum) ++ triplets(other_nums, fn_compare, sum)
+  defp pythagorean_triplets(min, max) do
+    for a <- min..max - 2,
+        b <- a + 1..max - 1,
+        c <- b + 1..max,
+        pythagorean?([a, b, c]),
+        do: [a, b, c]
   end
-
-  #for set first number finds other two numbers for pythagorean triplet (if they exist)
-  defp find_triplets(_num, [], _fn_compare, _sum), do: []
-  defp find_triplets(a, [b | other_nums], fn_compare, sum) do
-    {found_triplet, c} = last_triplet_number(a, b, other_nums, sum, fn_compare)
-    if (found_triplet) do
-      [sqrt_triplets(a, b, c)] ++ find_triplets(a, other_nums, fn_compare, sum)
-    else
-      find_triplets(a, other_nums, fn_compare, sum)
-    end
-  end
-
-  defp last_triplet_number(a, b, other_nums, sum, fn_compare) do
-    c = Enum.find(other_nums, -1, fn(c) -> fn_compare.(a, b, c, sum) end)
-    {c > 0, c}
-  end
-
-  defp sqrt_triplets(a, b, c), do: [round(:math.sqrt(a)), round(:math.sqrt(b)), round(:math.sqrt(c))]
 
   @doc """
   Generates a list of pythagorean triplets from a given min to a given max, whose values add up to a given sum.
   """
   @spec generate(non_neg_integer, non_neg_integer, non_neg_integer) :: [list(non_neg_integer)]
   def generate(min, max, sum) do
-    min..max
-      |> Enum.to_list
-      |> Enum.map(fn(x) -> x * x end)
-      |> triplets(fn(a, b, c, sum) -> c == a + b and 
-          round(:math.sqrt(a)) + round(:math.sqrt(b)) + round(:math.sqrt(c)) == sum end, sum)
+    pythagorean_triplets(min, max) |> Enum.filter(fn(triplet) -> sum(triplet) == sum end)
   end
 
 end

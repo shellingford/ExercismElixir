@@ -7,17 +7,8 @@ defmodule Matrix do
   def rows(str) do
     str
       |> String.split("\n", trim: true)
-      |> parse_rows
+      |> Enum.reduce([], fn(x, acc) -> acc ++ [x |> String.split(" ") |> Enum.map(&String.to_integer/1)] end)
   end
-
-  defp parse_rows([]), do: [] 
-  defp parse_rows([str_row | other_rows]), do: [parse_row(String.split(str_row, " "), [])] ++ parse_rows(other_rows)
-
-
-  defp parse_row([], []), do: []
-  defp parse_row([], row), do: row
-  defp parse_row([char | other_chars], []), do: parse_row(other_chars, [String.to_integer(char)])
-  defp parse_row([char | other_chars], row), do: parse_row(other_chars, row ++ [String.to_integer(char)])
 
   @doc """
   Parses a string representation of a matrix
@@ -40,23 +31,16 @@ defmodule Matrix do
     matrix = rows(str)
     t_matrix = columns(str)
 
-    #assume matrix is not NxN, but MxN
-    create_pairs(length(matrix), length(t_matrix))
-      |> Enum.filter(fn ({i, j}) ->
-          col = Enum.at(t_matrix, j)
-          row = Enum.at(matrix, i)
-          is_saddle(row, j, &Kernel.>=/2) && is_saddle(col, i, &Kernel.<=/2)
-        end)
+    #assume matrix is MxN
+    for i <- 0..(length(matrix) - 1),
+        j <- 0..(length(t_matrix) - 1),
+        saddle?(Enum.at(matrix, i), j, &Kernel.>=/2) && saddle?(Enum.at(t_matrix, j), i, &Kernel.<=/2),
+        do: {i, j}
   end
 
-  defp is_saddle(nums_to_compare, i, compare_fun) do
+  defp saddle?(nums_to_compare, i, compare_fun) do
     current_num = Enum.at(nums_to_compare, i)
-    nums_to_compare
-      |> Enum.all?(fn (other_num) -> compare_fun.(current_num, other_num) end)
-  end
-
-  defp create_pairs(row_no, col_no) do
-    for i <- 0..(row_no - 1), j <- 0..(col_no - 1), do: {i, j}
+    nums_to_compare |> Enum.all?(fn (other_num) -> compare_fun.(current_num, other_num) end)
   end
 
 end

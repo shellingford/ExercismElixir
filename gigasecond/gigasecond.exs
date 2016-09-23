@@ -5,8 +5,8 @@ defmodule Gigasecond do
   """
   @spec from({{pos_integer, pos_integer, pos_integer}, {pos_integer, pos_integer, pos_integer}}) :: :calendar.datetime
 
-  def from({{year, month, day}, {hours, minutes, seconds}}) do
-  	sec = :calendar.datetime_to_gregorian_seconds({{year, month, day}, {hours, minutes, seconds}})
+  def from({date, time}) do
+  	sec = :calendar.datetime_to_gregorian_seconds({date, time})
   	sec = sec + 1_000_000_000
   	:calendar.gregorian_seconds_to_datetime(sec)
   end

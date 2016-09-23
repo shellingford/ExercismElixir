@@ -14,17 +14,15 @@ defmodule Luhn do
   """
   @spec checksum(String.t()) :: integer
   def checksum(number) do
-    do_checks(Enum.reverse(String.graphemes(number)), 0)
+    do_checksum(Enum.reverse(String.graphemes(number)), 0)
   end
 
-  defp do_checks([], csum), do: csum
-  defp do_checks([_first, second | _other_digits], csum) when second == nil, do: csum
-  defp do_checks([first | other_digits], csum) when length(other_digits) == 0, do: csum + String.to_integer(first)
-  defp do_checks([first, second | other_digits], csum) when second != nil do
+  defp do_checksum([], csum), do: csum
+  defp do_checksum([first], csum), do: csum + String.to_integer(first)
+  defp do_checksum([first, second | other_digits], csum) do
     dig1 = String.to_integer(first)
-    dig2 = String.to_integer(second) * 2
-    dig2 = recalc_dig2(dig2)
-    do_checks(other_digits, csum + dig2 + dig1)
+    dig2 = recalc_dig2(String.to_integer(second) * 2)
+    do_checksum(other_digits, csum + dig2 + dig1)
   end
 
   defp recalc_dig2(dig2) when dig2 >= 10, do: dig2 - 9
@@ -44,15 +42,9 @@ defmodule Luhn do
   """
   @spec create(String.t()) :: String.t()
   def create(number) do
-    do_create(Enum.to_list(0..9), number)
-  end
-
-  defp do_create([first | others], number) do
-    possible_num = number <> Integer.to_string(first)
-    if (valid?(possible_num)) do
-      possible_num
-    else 
-      do_create(others, number)
-    end
+    Enum.to_list(0..9)
+      |> Enum.map(fn(x) -> number <> Integer.to_string(x) end)
+      |> Enum.filter(fn(x) -> valid?(x) end)
+      |> Enum.join("")
   end
 end

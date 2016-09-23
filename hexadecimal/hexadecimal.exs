@@ -33,15 +33,13 @@ defmodule Hexadecimal do
     do: convert_to_dec(digit) * round(:math.pow(16, power)) + convert_decimals(other_digits, power + 1)
 
   defp convert_to_dec(hex) when hex in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], do: String.to_integer(hex)
-  defp convert_to_dec(hex) when hex in ["a", "b", "c", "d", "e", "f"] do
-    case hex do
-      "a" -> 10
-      "b" -> 11
-      "c" -> 12
-      "d" -> 13
-      "e" -> 14
-      "f" -> 15
-    end
-  end
+  defp convert_to_dec(hex) when hex in ["a", "b", "c", "d", "e", "f"], do: hex_letter_to_dec(hex)
+
+  defp hex_letter_to_dec("a"), do: 10
+  defp hex_letter_to_dec("b"), do: 11
+  defp hex_letter_to_dec("c"), do: 12
+  defp hex_letter_to_dec("d"), do: 13
+  defp hex_letter_to_dec("e"), do: 14
+  defp hex_letter_to_dec("f"), do: 15
 
 end

@@ -10,8 +10,8 @@ defmodule ChangeTest do
 
   @tag :pending
   test "generates the correct change when there are multiple solutions for amount but only one correct one" do
-    change = %{3 => 0, 6 => 2, 10 => 1}
-    assert Change.generate(22, [3, 6, 10]) == {:ok, change}
+    change = %{3 => 1, 5 => 1, 10 => 1}
+    assert Change.generate(18, [5, 10, 3]) == {:ok, change}
   end
 
   @tag :pending

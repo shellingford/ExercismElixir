@@ -5,21 +5,16 @@ defmodule PascalsTriangle do
   """
   @spec rows(integer) :: [[integer]]
   def rows(num) do
-  	calc_rows(num, 1, [])
+  	pascals_triangle_rows(num)
   end
-  defp calc_rows(max_row, current_row, []), do: calc_rows(max_row, current_row + 1, [[1]])
-  defp calc_rows(max_row, current_row, rows_before) when current_row > max_row, do: rows_before
-  defp calc_rows(max_row, current_row, rows_before) when current_row <= max_row,
-    do: calc_rows(max_row, current_row + 1, rows_before ++ create_row(List.last(rows_before), []))
 
-  defp create_row([first | others_from_row_before], []) when length(others_from_row_before) > 0,
-    do: create_row([first | others_from_row_before], [first])
-  defp create_row([first | others_from_row_before], []) when length(others_from_row_before) == 0,
-  	do: create_row(others_from_row_before, [first, first])
-  defp create_row([first, second | others_from_row_before], current_row),
-  	do: create_row([second | others_from_row_before], current_row ++ [(first + second)])
-  defp create_row([last | others_from_row_before], current_row) when length(others_from_row_before) == 0,
-  	do: create_row(others_from_row_before, current_row ++ [last])
-  defp create_row([], current_row), do: [current_row]
+  defp pascals_triangle_rows(num) do
+    Enum.reduce(1..num, [], fn(_row_ind, acc) -> acc ++ pascals_triangle_row(List.last(acc)) end)
+  end
 
+  defp pascals_triangle_row(nil), do: [[1]]
+  defp pascals_triangle_row(previous_row) do
+    middle_items = previous_row |> Enum.chunk(2, 1) |> Enum.map(&Enum.sum/1)
+    [[1] ++ middle_items ++ [1]]
+  end
 end

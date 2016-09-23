@@ -5,69 +5,30 @@ defmodule BracketPush do
   """
   @spec check_brackets(String.t) :: boolean
   def check_brackets(str) do
-  	do_checking(String.graphemes(str), [])
+    Regex.scan(~r/[\[\]\(\)\{\}<>]/, str)
+      |> List.flatten
+      |> do_checking([])
   end
 
-  defp do_checking([char | other_chars], []) do
-  	if (is_bracket(char)) do
-  		bracket_list = [char]
-  		do_checking(other_chars, bracket_list)
-  	else
-  		do_checking(other_chars, [])
-  	end
+  defp do_checking([current_bracket | other_brackets], []) do
+  	bracket_list = [current_bracket]
+    do_checking(other_brackets, bracket_list)
   end
 
-  defp do_checking([char | other_chars], brackets) do
-  	#if character is a bracket, process it, otherwise ignore it
-  	if (is_bracket(char)) do
-		  last_bracket = List.last(brackets)
-  		cond do
-  			is_opening_bracket(char) -> process_opening_bracket(last_bracket, brackets, char, other_chars)
-  			is_closing_bracket(char) -> process_closing_bracket(last_bracket, brackets, char, other_chars)
-  		end
-  	else
-  		do_checking(other_chars, brackets)
-  	end
+  defp do_checking([current_bracket | other_brackets], brackets) when current_bracket in ["[", "(", "{", "<"],
+    do: do_checking(other_brackets, [current_bracket | brackets])
+
+  defp do_checking([current_bracket | other_brackets], [prev_bracket | brackets]) when current_bracket in ["]", ")", "}", ">"] do
+    if (valid_bracket_pair?(prev_bracket, current_bracket)) do
+      do_checking(other_brackets, brackets)
+    else
+      false
+    end
   end
 
   defp do_checking([], []), do: true
   defp do_checking([], _brackets), do: false
 
-  defp process_opening_bracket(last_bracket, brackets, char, other_chars) do 
-    if (is_opening_bracket(last_bracket)) do
-        brackets = brackets ++ [char]
-        do_checking(other_chars, brackets)
-    else
-      false
-    end
-  end
-
-  defp process_closing_bracket(last_bracket, brackets, char, other_chars) do 
-    if (check_bracket_pair(last_bracket, char)) do
-      brackets = Enum.reverse(Enum.reverse(brackets) -- [last_bracket])
-      do_checking(other_chars, brackets)
-    else
-      false
-    end
-  end
-
-  defp is_bracket(char) do
-  	is_opening_bracket(char) or is_closing_bracket(char)
-  end
-
-  defp is_opening_bracket(char) do
-  	char == "[" or char == "(" or char == "{" or char == "<"
-  end
-
-  defp is_closing_bracket(char) do
-  	char == "]" or char == ")" or char == "}" or char == ">"
-  end
-
-  defp check_bracket_pair(opening_bracket, closing_bracket) do
-  	opening_bracket == "[" and closing_bracket == "]" or
-  	opening_bracket == "{" and closing_bracket == "}" or
-  	opening_bracket == "(" and closing_bracket == ")" or
-  	opening_bracket == "<" and closing_bracket == ">"
-  end
-
+  defp valid_bracket_pair?(opening_bracket, closing_bracket),
+    do: {opening_bracket, closing_bracket} in [{"[","]"}, {"{","}"}, {"(",")"}, {"<",">"}] 
 end

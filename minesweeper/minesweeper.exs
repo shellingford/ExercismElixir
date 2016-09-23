@@ -61,8 +61,7 @@ defmodule Minesweeper do
 
   defp create_row_from_map(map, ind) do
     map |> Enum.filter(fn({{x, _y}, _v}) -> x == ind end)
-        |> Enum.map(fn({_key, v}) -> v end)
-        |> Enum.join("")
+        |> Enum.map_join(fn({_key, v}) -> v end)
   end
 
 end

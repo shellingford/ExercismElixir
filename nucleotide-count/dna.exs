@@ -1,5 +1,4 @@
 defmodule DNA do
-  require Logger
   @nucleotides [?A, ?C, ?G, ?T]
 
   @doc """
@@ -15,24 +14,16 @@ defmodule DNA do
   """
   @spec count([char], char) :: non_neg_integer
   def count(strand, nucleotide) do
-    if (is_valid_nucleotide_or_raise_error(nucleotide)) do
-      do_count(strand, nucleotide, 0)
-    else
-      raise ArgumentError
-    end
+    validate_strand(strand ++ [nucleotide])
+    Enum.count(strand, &(&1 == nucleotide))
   end
 
-  defp do_count([], _nucleotide, count), do: count
-  defp do_count([char | strand], nucleotide, count) do
-    if (is_valid_nucleotide_or_raise_error(char) and char == nucleotide) do
-      do_count(strand, nucleotide, count + 1)
-    else
-      do_count(strand, nucleotide, count)
-    end
+  defp validate_strand(strand) do
+    if (not Enum.all?(strand, &is_valid_nucleotide/1)), do: raise ArgumentError
   end
 
-  defp is_valid_nucleotide_or_raise_error(char) when char in [?A, ?T, ?C, ?G, ''], do: true
-  defp is_valid_nucleotide_or_raise_error(_char), do: raise ArgumentError
+  defp is_valid_nucleotide(nucleotide) when nucleotide in [?A, ?T, ?C, ?G, ''], do: true
+  defp is_valid_nucleotide(_nucleotide), do: false
 
   @doc """
   Returns a summary of counts by nucleotide.
@@ -44,16 +35,9 @@ defmodule DNA do
   """
   @spec histogram([char]) :: map
   def histogram(strand) do
+    validate_strand(strand)
     histogram =  %{?A => 0, ?T => 0, ?C => 0, ?G => 0}
-    do_histogram(strand, histogram)
-  end
-
-  defp do_histogram([], histogram), do: histogram
-  defp do_histogram([char | strand], histogram)  do
-    if (is_valid_nucleotide_or_raise_error(char)) do
-      histogram = Map.update!(histogram, char, &(&1 + 1))
-      do_histogram(strand, histogram)
-    end
+    Enum.reduce(strand, histogram, fn(nucleotide, histogram) -> Map.update!(histogram, nucleotide, &(&1 + 1)) end)
   end
 
 end

@@ -43,10 +43,10 @@ defmodule RailFenceCipherTest do
     assert RailFenceCipher.encode(msg, 24) == msg
   end
 
-  @tag :pending
+  #@tag :pending
   test "decode full zigzag cipher" do
-    cipher = "TEITELHDVLSNHDTIEIIEA"
-    assert RailFenceCipher.decode(cipher, 3) == "THEDEVILISINTHEDETAIL"
+    cipher = "WECRLTEERDSOEEFEAOCAIVDEN"
+    assert RailFenceCipher.decode(cipher, 3) == "WEAREDISCOVEREDFLEEATONCE"
   end
 
   @tag :pending

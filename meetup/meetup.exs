@@ -19,20 +19,20 @@ defmodule Meetup do
   def meetup(year, month, weekday, schedule) do
     first_day_of_month = :calendar.day_of_the_week(year, month, 1)
     day_of_month = 1
-    wday_num = weekday_as_num(weekday)
+    wday = weekday_as_num(weekday)
 
     #set date to correct weekday
-    day_of_month = day_of_month |> calculate_date_of_month(first_day_of_month, wday_num)
+    day_of_month = day_of_month |> calculate_date_of_month(first_day_of_month, wday)
 
     #shift date to correct week of the month
-    {year, month, find_correct_day_of_month(day_of_month, wday_num, year, month, schedule)}
+    {year, month, find_correct_day_of_month(day_of_month, wday, year, month, schedule)}
   end
 
-  defp calculate_date_of_month(day_of_month, first_day_of_month, wday_num) when first_day_of_month > wday_num,
-    do: day_of_month + 7 - first_day_of_month + wday_num
-  defp calculate_date_of_month(day_of_month, first_day_of_month, wday_num) when first_day_of_month < wday_num,
-    do: day_of_month + wday_num - first_day_of_month
-  defp calculate_date_of_month(day_of_month, first_day_of_month, wday_num) when first_day_of_month == wday_num,
+  defp calculate_date_of_month(day_of_month, first_day_of_month, wday) when first_day_of_month > wday,
+    do: day_of_month + 7 - first_day_of_month + wday
+  defp calculate_date_of_month(day_of_month, first_day_of_month, wday) when first_day_of_month < wday,
+    do: day_of_month + wday - first_day_of_month
+  defp calculate_date_of_month(day_of_month, first_day_of_month, wday) when first_day_of_month == wday,
     do: day_of_month
 
   defp weekday_as_num(:monday), do: 1
@@ -43,40 +43,43 @@ defmodule Meetup do
   defp weekday_as_num(:saturday), do: 6
   defp weekday_as_num(:sunday), do: 7
 
-  defp find_correct_day_of_month(day_of_month, _wday_num, _year, _month, :first) do
+  defp find_correct_day_of_month(day_of_month, _wday, _year, _month, :first) do
     day_of_month
   end
 
-  defp find_correct_day_of_month(day_of_month, _wday_num, _year, _month, :second) do
+  defp find_correct_day_of_month(day_of_month, _wday, _year, _month, :second) do
     day_of_month + 7
   end
 
-  defp find_correct_day_of_month(day_of_month, _wday_num, _year, _month, :third) do
+  defp find_correct_day_of_month(day_of_month, _wday, _year, _month, :third) do
     day_of_month + 14
   end
 
-  defp find_correct_day_of_month(day_of_month, _wday_num, _year, _month, :fourth) do
+  defp find_correct_day_of_month(day_of_month, _wday, _year, _month, :fourth) do
     day_of_month + 21
   end
 
-  defp find_correct_day_of_month(_day_of_month, wday_num, year, month, :last) do
-    find_last_of_month(wday_num, year, month)
+  defp find_correct_day_of_month(_day_of_month, wday, year, month, :last) do
+    find_last_of_month(wday, year, month)
   end
 
-  defp find_correct_day_of_month(day_of_month, _wday_num, year, month, :teenth) do
+  defp find_correct_day_of_month(day_of_month, _wday, year, month, :teenth) do
     find_teenth_of_month(day_of_month + 7, year, month)
   end
 
-  defp find_last_of_month(wday_num, year, month) do
+  defp find_last_of_month(wday, year, month) do
     last_day_of_month = :calendar.last_day_of_the_month(year, month)
     wday_last_day = :calendar.day_of_the_week(year, month, last_day_of_month)
 
-    cond do
-      wday_last_day > wday_num -> last_day_of_month - (wday_last_day - wday_num)
-      wday_last_day < wday_num -> last_day_of_month - (7 - wday_num + wday_last_day)
-      true -> last_day_of_month
-    end
+    last_day_of_month(wday_last_day, wday, last_day_of_month)
   end
+
+  defp last_day_of_month(wday_last_day, wday, last_day_of_month) when wday_last_day > wday,
+    do: last_day_of_month - (wday_last_day - wday)
+  defp last_day_of_month(wday_last_day, wday, last_day_of_month) when wday_last_day < wday,
+    do: last_day_of_month - (7 - wday + wday_last_day)
+  defp last_day_of_month(_wday_last_day, _wday, last_day_of_month),
+    do: last_day_of_month
 
   defp find_teenth_of_month(day_of_month, _year, _month) when day_of_month > 12 and day_of_month < 21, do: day_of_month
   defp find_teenth_of_month(day_of_month, year, month), do: find_teenth_of_month(day_of_month + 7, year, month)

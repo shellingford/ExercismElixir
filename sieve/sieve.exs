@@ -11,13 +11,8 @@ defmodule Sieve do
 
   defp find_primes([]), do: []
   defp find_primes([prime | other_numbers]) do
-  	other_numbers = other_numbers |> remove_multiples(prime)
+  	other_numbers = other_numbers |> Enum.filter(fn(x) -> rem(x, prime) != 0 end)
   	[prime] ++ find_primes(other_numbers)
   end
-
-  defp remove_multiples([], _prime), do: []
-  defp remove_multiples([number | other_numbers], prime) when rem(number, prime) == 0,
-  	do: remove_multiples(other_numbers, prime)
-  defp remove_multiples([number | other_numbers], prime), do: [number] ++ remove_multiples(other_numbers, prime)
 
 end
